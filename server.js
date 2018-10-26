@@ -11,19 +11,21 @@ app.get('/', function(req,res){
 	res.send('works');
 });
 
-app.post('/files', function(req,res){
-	res.send('files');
+app.get('/files', function(req,res){
+	res.send(req.headers);
 	return;
 	var client_email = req.headers.client_email;
 	var private_key = req.headers.private_key;
+	
 	var auth = getAuthorize(config, req.headers);
+	
 	post = res;
 	listFolders(auth, req.headers.query);
 	
 })
 
-app.post('/download', function (req, res) {
-	res.send('download');
+app.get('/download', function (req, res) {
+	res.send(req.headers);
 	return;
 	var client_email = req.headers.client_email;
 	var private_key = req.headers.private_key;
