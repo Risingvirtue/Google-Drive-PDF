@@ -21,7 +21,7 @@ app.get('/files', function(req,res){
 		private_key = private_key.split('?').join('\n');
 		
 		var access = {client_email: client_email, private_key: private_key};
-		
+		res.send(access);
 		var auth = getAuthorize(config, access);
 		
 		post = res;
@@ -60,8 +60,7 @@ function getAuthorize(credentials, test) {
 
 function listFolders(auth, query) {
   const drive = google.drive({version: 'v3', auth});
-  post.send('list');
-  return;
+ 
   drive.files.list({
     pageSize: 1,
     fields: 'nextPageToken, files(id, name, parents)',
