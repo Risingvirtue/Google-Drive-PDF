@@ -18,10 +18,7 @@ app.get('/files', function(req,res){
 		//couldn't send \n
 		var private_key = req.headers.private_key;
 		
-		private_key = JSON.parse(private_key);
-		res.send(private_key.length);
-		return;
-		private_key = private_key.join('\n');
+		private_key = private_key.split('?').join('\n');
 		
 		var access = {client_email: client_email, private_key: private_key};
 		
