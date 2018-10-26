@@ -12,12 +12,13 @@ app.get('/', function(req,res){
 });
 
 app.get('/files', function(req,res){
-	res.send(req.headers);
-	return;
-	var client_email = req.headers.client_email;
-	var private_key = req.headers.private_key;
 	
-	var auth = getAuthorize(config, req.headers);
+	var client_email = req.headers.client_email;
+	//couldn't send \n
+	var private_key = req.headers.private_key;
+	private_key = JSON.parse(private_key).join('\n');
+	var access = {client_email: client_email, private_key: private_key};
+	var auth = getAuthorize(config, access);
 	
 	post = res;
 	listFolders(auth, req.headers.query);
@@ -25,12 +26,14 @@ app.get('/files', function(req,res){
 })
 
 app.get('/download', function (req, res) {
-	res.send(req.headers);
-	return;
+	
 	var client_email = req.headers.client_email;
+	//couldn't send \n
 	var private_key = req.headers.private_key;
+	private_key = JSON.parse(private_key).join('\n');
 	var fileId = req.headers.fileId;
-	var auth = getAuthorize(config, req.headers);
+	var access = {client_email: client_email, private_key: private_key};
+	var auth = getAuthorize(config, access);
 	post = res;
 	download(auth, fileId);
 })
@@ -90,6 +93,7 @@ function getFileNames(auth, query, nextPageToken, fileIds, callback) {
 	  });
     } else {
       console.log('No files found.');
+	  post.send('err');
     }
 	if (newPageToken) {
 		return callback(auth, query, newPageToken, fileIds, callback);
@@ -121,6 +125,7 @@ function download(auth, fileInfo) {
 			})
 			.on('error', err => {
 				console.log('Error', err);
+				post.send('err');
 			})
 			
 		}
