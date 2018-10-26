@@ -12,16 +12,20 @@ app.get('/', function(req,res){
 });
 
 app.get('/files', function(req,res){
+	try {
+		var client_email = req.headers.client_email;
+		//couldn't send \n
+		var private_key = req.headers.private_key;
+		private_key = JSON.parse(private_key).join('\n');
+		var access = {client_email: client_email, private_key: private_key};
+		var auth = getAuthorize(config, access);
+		
+		post = res;
+		listFolders(auth, req.headers.query);
+	} catch (e) {
+		post.send(e);
+	}
 	
-	var client_email = req.headers.client_email;
-	//couldn't send \n
-	var private_key = req.headers.private_key;
-	private_key = JSON.parse(private_key).join('\n');
-	var access = {client_email: client_email, private_key: private_key};
-	var auth = getAuthorize(config, access);
-	
-	post = res;
-	listFolders(auth, req.headers.query);
 	
 })
 
@@ -52,8 +56,7 @@ function getAuthorize(credentials, test) {
 
 function listFolders(auth, query) {
   const drive = google.drive({version: 'v3', auth});
-  res.send('folders');
-  return;
+  
   drive.files.list({
     pageSize: 1,
     fields: 'nextPageToken, files(id, name, parents)',
