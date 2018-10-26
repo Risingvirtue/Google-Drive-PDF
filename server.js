@@ -12,8 +12,7 @@ app.get('/', function(req,res){
 });
 
 app.get('/files', function(req,res){
-	res.send('test');
-	return;
+	
 	var client_email = req.headers.client_email;
 	//couldn't send \n
 	var private_key = req.headers.private_key;
@@ -53,6 +52,8 @@ function getAuthorize(credentials, test) {
 
 function listFolders(auth, query) {
   const drive = google.drive({version: 'v3', auth});
+  res.send('folders');
+  return;
   drive.files.list({
     pageSize: 1,
     fields: 'nextPageToken, files(id, name, parents)',
