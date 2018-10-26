@@ -19,7 +19,7 @@ app.get('/files', function(req,res){
 		var private_key = req.headers.private_key;
 		private_key = JSON.parse(private_key).join('\n');
 		var access = {client_email: client_email, private_key: private_key};
-		res.send(JSON.parse(access));
+		res.send(req.headers);
 		var auth = getAuthorize(config, access);
 		
 		post = res;
