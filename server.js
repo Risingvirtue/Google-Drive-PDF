@@ -60,7 +60,8 @@ function getAuthorize(credentials, test) {
 
 function listFolders(auth, query) {
   const drive = google.drive({version: 'v3', auth});
-  
+  post.send('list');
+  return;
   drive.files.list({
     pageSize: 1,
     fields: 'nextPageToken, files(id, name, parents)',
@@ -73,6 +74,7 @@ function listFolders(auth, query) {
     if (files.length) {	
       files.forEach(function (file) {  
 		let fileQuery = "'" + file.id + "'" + " in parents";
+		
 		getFileNames(auth, fileQuery, null, [], getFileNames);
 	  });
     } else {
