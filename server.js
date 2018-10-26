@@ -13,13 +13,14 @@ app.get('/', function(req,res){
 
 app.get('/files', function(req,res){
 	try {
-		
 		var client_email = req.headers.client_email;
+		res.send(client_email);
+		return;
 		//couldn't send \n
 		var private_key = req.headers.private_key;
 		private_key = JSON.parse(private_key).join('\n');
 		var access = {client_email: client_email, private_key: private_key};
-		res.send(req.headers);
+		
 		var auth = getAuthorize(config, access);
 		
 		post = res;
