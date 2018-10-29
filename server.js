@@ -12,7 +12,7 @@ app.get('/', function(req,res){
 });
 
 app.get('/files', function(req,res){
-	try {
+	
 		var client_email = req.headers.client_email;
 		
 		//couldn't send \n
@@ -21,16 +21,17 @@ app.get('/files', function(req,res){
 		private_key = private_key.split('?').join('\n');
 		
 		var access = {client_email: client_email, private_key: private_key};
-		
-		var auth = getAuthorize(dict);
+		res.send(access);
+		return;
+		var auth = getAuthorize(access);
 		
 		post = res;
 		listFolders(auth, req.headers.query);
 		
-	} catch (e) {
-		console.log(e);
-		res.send(e);
-	}
+	
+		//console.log(e);
+		//res.send(e);
+	
 	
 	
 })
