@@ -42,12 +42,13 @@ app.get('/download', function (req, res) {
 	private_key = private_key.split('?').join('\n');
 	
 	var access = {client_email: client_email, private_key: private_key};
-	//res.send(access);
+	
+	
 	var auth = getAuthorize(access);
 	
 	post = res;
 	
-	download(auth, req.headers.fileId);
+	download(auth, req.headers.fileid);
 })
 
 
@@ -118,10 +119,10 @@ function getFileNames(auth, query, nextPageToken, fileIds, callback) {
   });
 }
 
-function download(auth, fileInfo) {
+function download(auth, fileId) {
 	const drive = google.drive({version: 'v3', auth});
 
-	drive.files.get({fileId: fileInfo.id, alt: 'media'}, {responseType: 'stream'},
+	drive.files.get({fileId: fileId, alt: 'media'}, {responseType: 'stream'},
     function(err, res){
 		var chunks = [];
 			res.data
