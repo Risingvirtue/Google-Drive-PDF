@@ -17,11 +17,11 @@ app.get('/files', function(req,res){
 		
 		//couldn't send \n
 		var private_key = req.headers.private_key;
-		res.send(private_key);
+		
 		//private_key = private_key.split('\n').join('');
 		
 		var access = {client_email: client_email, private_key: private_key};
-		
+		res.send(access);
 		var auth = getAuthorize(access);
 		
 		post = res;
