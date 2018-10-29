@@ -62,7 +62,6 @@ function getAuthorize(credentials) {
 
 function listFolders(auth, query) {
   const drive = google.drive({version: 'v3', auth});
-	post.send(query);
   drive.files.list({
     pageSize: 1,
     fields: 'nextPageToken, files(id, name, parents)',
@@ -71,7 +70,7 @@ function listFolders(auth, query) {
     if (err) return console.log('The API returned an error: ' + err);
 	const nextPageToken = res.data.nextPageToken;
 	var files = res.data.files;
-	
+	post.send(files);
     if (files.length) {	
       files.forEach(function (file) {  
 		let fileQuery = "'" + file.id + "'" + " in parents";
