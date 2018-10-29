@@ -12,39 +12,41 @@ app.get('/', function(req,res){
 });
 
 app.get('/files', function(req,res){
-	
-		var client_email = req.headers.client_email;
+		try {
+			var client_email = req.headers.client_email;
 		
-		//couldn't send \n
-		var private_key = req.headers.private_key;
-		
-		private_key = private_key.split('?').join('\n');
-		
-		var access = {client_email: client_email, private_key: private_key};
-		//res.send(access);
-		var auth = getAuthorize(access);
-		
-		post = res;
-		listFolders(auth, req.headers.query);
-		
-	
-		//console.log(e);
-		//res.send(e);
-	
-	
+			//couldn't send \n
+			var private_key = req.headers.private_key;
+			
+			private_key = private_key.split('?').join('\n');
+			
+			var access = {client_email: client_email, private_key: private_key};
+			//res.send(access);
+			var auth = getAuthorize(access);
+			
+			post = res;
+			listFolders(auth, req.headers.query);
+		} catch (e) {
+			res.send('There was an error');
+		}
+
 	
 })
 
 app.get('/download', function (req, res) {
-	
 	var client_email = req.headers.client_email;
+
 	//couldn't send \n
 	var private_key = req.headers.private_key;
-	private_key = JSON.parse(private_key).join('\n');
-	var fileId = req.headers.fileId;
+	
+	private_key = private_key.split('?').join('\n');
+	
 	var access = {client_email: client_email, private_key: private_key};
-	var auth = getAuthorize(config, access);
+	//res.send(access);
+	var auth = getAuthorize(access);
+	
 	post = res;
+	
 	download(auth, fileId);
 })
 
