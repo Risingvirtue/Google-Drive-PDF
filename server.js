@@ -47,7 +47,7 @@ app.get('/download', function (req, res) {
 	
 	post = res;
 	
-	download(auth, fileId);
+	download(auth, req.headers.fileId);
 })
 
 
