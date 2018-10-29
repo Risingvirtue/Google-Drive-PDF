@@ -22,11 +22,13 @@ app.get('/files', function(req,res){
 		
 		var access = {client_email: client_email, private_key: private_key};
 		
-		var auth = getAuthorize(config, access);
+		var auth = getAuthorize(dict);
 		
 		post = res;
 		listFolders(auth, req.headers.query);
+		
 	} catch (e) {
+		console.log(e);
 		res.send(e);
 	}
 	
@@ -47,7 +49,7 @@ app.get('/download', function (req, res) {
 })
 
 
-function getAuthorize(credentials, test) {
+function getAuthorize(credentials) {
   const jwtClient = new google.auth.JWT(
 	  credentials.client_email,
 	  null,
@@ -60,7 +62,7 @@ function getAuthorize(credentials, test) {
 
 function listFolders(auth, query) {
   const drive = google.drive({version: 'v3', auth});
- 
+	
   drive.files.list({
     pageSize: 1,
     fields: 'nextPageToken, files(id, name, parents)',
@@ -69,7 +71,6 @@ function listFolders(auth, query) {
     if (err) return console.log('The API returned an error: ' + err);
 	const nextPageToken = res.data.nextPageToken;
 	var files = res.data.files;
-	
     if (files.length) {	
       files.forEach(function (file) {  
 		let fileQuery = "'" + file.id + "'" + " in parents";
