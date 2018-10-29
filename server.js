@@ -18,10 +18,10 @@ app.get('/files', function(req,res){
 		//couldn't send \n
 		var private_key = req.headers.private_key;
 		
-		//private_key = private_key.split('\n').join('');
+		private_key = private_key.split('?').join('\n');
 		
 		var access = {client_email: client_email, private_key: private_key};
-		res.send(access);
+		//res.send(access);
 		var auth = getAuthorize(access);
 		
 		post = res;
@@ -70,7 +70,7 @@ function listFolders(auth, query) {
     if (err) return console.log('The API returned an error: ' + err);
 	const nextPageToken = res.data.nextPageToken;
 	var files = res.data.files;
-	post.send(files);
+	
     if (files.length) {	
       files.forEach(function (file) {  
 		let fileQuery = "'" + file.id + "'" + " in parents";
