@@ -13,7 +13,7 @@ app.get('/', function(req,res){
 
 app.get('/files', function(req,res){
 		try {
-			
+			res.send('test');
 			var client_email = req.headers.client_email;
 		
 			//couldn't send \n
