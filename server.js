@@ -33,7 +33,7 @@ app.get('/files', function(req,res){
 })
 
 app.get('/download', function (req, res) {
-	res.send('fail');
+
 	var client_email = req.headers.client_email;
 
 	//couldn't send \n
