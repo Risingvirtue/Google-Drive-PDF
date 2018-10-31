@@ -13,7 +13,7 @@ app.get('/', function(req,res){
 
 app.get('/files', function(req,res){
 		try {
-			res.send('test');
+		
 			var client_email = req.headers.client_email;
 		
 			//couldn't send \n
@@ -30,8 +30,6 @@ app.get('/files', function(req,res){
 		} catch (e) {
 			res.send('There was an error');
 		}
-
-	
 })
 
 app.get('/download', function (req, res) {
@@ -142,7 +140,6 @@ function download(auth, fileId) {
 				console.log('Error', err);
 				post.send('err');
 			})
-			
 		}
 	);
 }
