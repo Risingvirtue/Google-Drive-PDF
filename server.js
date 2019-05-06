@@ -100,9 +100,10 @@ function getFileNames(auth, query, nextPageToken, fileIds, callback) {
     if (err) return console.log('The API returned an error: ' + err);
 	const newPageToken = res.data.nextPageToken;
     const files = res.data.files;
+	console.log(files);
     if (files.length) {	
       files.forEach(function (file) {
-		fileIds.push({name: file.name, id: file.id});
+		fileIds.push({name: file.name, id: file.id, link: file.webViewLink});
 	  });
     } else {
       console.log('No files found.');
@@ -112,6 +113,7 @@ function getFileNames(auth, query, nextPageToken, fileIds, callback) {
 		return callback(auth, query, newPageToken, fileIds, callback);
 		
 	} else {
+		
 		post.send(fileIds);
 	}
 	
@@ -202,6 +204,7 @@ function test() {
 
 test();
 */
+
 var listener = app.listen(process.env.PORT, function() {
 	console.log('Your app is listening on port ' + listener.address().port);
 })
