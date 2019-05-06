@@ -12,24 +12,24 @@ app.get('/', function(req,res){
 });
 
 app.get('/files', function(req,res){
-		try {
-			
-			var client_email = req.headers.client_email;
+	try {
 		
-			//couldn't send \n
-			var private_key = req.headers.private_key;
-			
-			private_key = private_key.split('?').join('\n');
-			
-			var access = {client_email: client_email, private_key: private_key};
-			//res.send(access);
-			var auth = getAuthorize(access);
-			
-			post = res;
-			listFolders(auth, req.headers.query);
-		} catch (e) {
-			res.send('There was an error');
-		}
+		var client_email = req.headers.client_email;
+	
+		//couldn't send \n
+		var private_key = req.headers.private_key;
+		
+		private_key = private_key.split('?').join('\n');
+		
+		var access = {client_email: client_email, private_key: private_key};
+		//res.send(access);
+		var auth = getAuthorize(access);
+		
+		post = res;
+		listFolders(auth, req.headers.query);
+	} catch (e) {
+		res.send({code: 404, status: 'error', message: 'An error has occurred'});
+	}
 })
 
 app.get('/download', function (req, res) {
@@ -70,7 +70,13 @@ function listFolders(auth, query) {
     fields: 'nextPageToken, files(id, name, parents)',
 	q: query
   }, (err, res) => {
-    if (err) return console.log('The API returned an error: ' + err);
+    if (err) {
+		return post.send({
+			code: 500, 
+			status: 'error', 
+			message: 'The API returned an error: ' + err
+		});
+	}
 	const nextPageToken = res.data.nextPageToken;
 	var files = res.data.files;
     if (files.length) {	
@@ -80,7 +86,7 @@ function listFolders(auth, query) {
 		getFileNames(auth, fileQuery, null, [], getFileNames);
 	  });
     } else {
-      post.send('No files found.');
+      post.send({code: 404, status: 'error', message: 'No files found.'});
     }
 	
   });
@@ -93,11 +99,17 @@ function getFileNames(auth, query, nextPageToken, fileIds, callback) {
   
   drive.files.list({
     pageSize: 100,
-    fields: 'files(id, name, parents, webViewLink)',
+    fields: '*',
 	q: query,
 	pageToken: nextPageToken
   }, (err, res) => {
-    if (err) return console.log('The API returned an error: ' + err);
+    if (err) {
+		return post.send({
+			code: 500, 
+			status: 'error', 
+			message: 'The API returned an error: ' + err
+		});
+	}
 	const newPageToken = res.data.nextPageToken;
     const files = res.data.files;
 	console.log(files);
@@ -107,14 +119,13 @@ function getFileNames(auth, query, nextPageToken, fileIds, callback) {
 	  });
     } else {
       console.log('No files found.');
-	  post.send('err');
+	  post.send({code: 404, status: 'error', message: 'No files found.'});
     }
 	if (newPageToken) {
 		return callback(auth, query, newPageToken, fileIds, callback);
 		
 	} else {
-		
-		post.send(fileIds);
+		post.send({code: 200, status: 'success', data: fileIds});
 	}
 	
   });
@@ -160,13 +171,13 @@ function download(auth, fileId) {
 				var result = Buffer.concat(chunks);
 				
 				var base64 = result.toString('base64');
-
-				post.send(base64);
 				
+				post.send({code: 200, status: 'success', data: base64});
+
 			})
 			.on('error', err => {
 				console.log('Error', err);
-				post.send('err');
+				res.send({code: 404, status: 'error', message: 'An error has occurred: ' + err});
 			})
 		}
 	);
@@ -195,7 +206,8 @@ function test() {
 	
 	getAuth().then((auth) => {
 		//addPermission(auth);
-		listFolders(auth, "name='SF12-28-18'");
+		listFolders(auth, "name='Exports'");
+		//download(auth, '1zVDTMrAgoPJTePLgq-4EB2SHUEMLJ9UN');
 	});
 	
 	
@@ -204,6 +216,7 @@ function test() {
 
 test();
 */
+
 
 var listener = app.listen(process.env.PORT, function() {
 	console.log('Your app is listening on port ' + listener.address().port);
