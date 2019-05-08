@@ -13,7 +13,6 @@ app.get('/', function(req,res){
 
 app.get('/files', async function(req,res) {
 	try {
-		console.log(req.headers);
 		var access = getKeyFromHeader(req.headers);
 		var auth = getAuthorize(access);
 
@@ -42,33 +41,6 @@ app.get('/files', async function(req,res) {
 	}
 })
 
-app.get('/files', function(req,res){
-	try {
-		var access = getKeyFromHeader(req.headers);
-		var auth = getAuthorize(access);
-
-		var files = [];
-		var nextPageToken = req.headers.nextPageToken || null;
-		var pageCount = req.headers.pageCount || 100;
-		var query = req.headers.query;
-		do {
-			var pageSize = Math.min(100, pageCount);
-			var currFiles = await listFolders(auth, query, nextPageToken, pageSize, params);
-			if (currFiles.err) {
-				res.send({code: 404, status: 'error', message: err});
-				return;
-			}
-			pageCount -= 100;
-			files = files.concat(currFiles.files);
-			nextPageToken = currFiles.nextPageToken;
-		} while (nextPageToken && pageCount > 0);
-		
-		res.send({code: 200, status: 'success', data: {files: files, nextPageToken: nextPageToken}});
-		
-	} catch (e) {
-		res.send({code: 404, status: 'error', message: 'An error has occurred' + e});
-	}
-})
 
 app.get('/download', function (req, res) {
 	
