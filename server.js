@@ -62,34 +62,21 @@ function getAuthorize(credentials) {
 	return jwtClient;
 }
 
-function listFolders(auth, query) {
-  const drive = google.drive({version: 'v3', auth});
-  
-  drive.files.list({
-    pageSize: 1,
-    fields: 'nextPageToken, files(id, name, parents)',
-	q: query
-  }, (err, res) => {
-    if (err) {
-		return post.send({
-			code: 500, 
-			status: 'error', 
-			message: 'The API returned an error: ' + err
+function listFolders(auth, query, pageSize = 100) {
+	const drive = google.drive({version: 'v3', auth});
+	return new Promise(function (resolve, reject) {
+		drive.files.list({
+			pageSize: pageSize,
+			fields: 'nextPageToken, files(id, name, modifiedTime)',
+			q: query,
+			orderBy: 'modifiedTime desc'
+		}, (err, res) => {
+			if (err) reject(err);
+			const nextPageToken = res.data.nextPageToken;
+			var files = res.data.files;
+			resolve({files: files, nextPageToken: nextPageToken});
 		});
-	}
-	const nextPageToken = res.data.nextPageToken;
-	var files = res.data.files;
-    if (files.length) {	
-      files.forEach(function (file) {
-		let fileQuery = "'" + file.id + "'" + " in parents";
-		
-		getFileNames(auth, fileQuery, null, [], getFileNames);
-	  });
-    } else {
-      post.send({code: 404, status: 'error', message: 'No files found.'});
-    }
-	
-  });
+	});
 }
 
 
@@ -112,7 +99,7 @@ function getFileNames(auth, query, nextPageToken, fileIds, callback) {
 	}
 	const newPageToken = res.data.nextPageToken;
     const files = res.data.files;
-	console.log(files);
+	
     if (files.length) {	
       files.forEach(function (file) {
 		fileIds.push({name: file.name, id: file.id, link: file.webViewLink});
@@ -201,25 +188,18 @@ function getAuth() {
 		})
 	})
 }
+async function test() {
+	var auth = await getAuth();
+	var fileInfo = await listFolders(auth, "'1cbyYutR6Qnj4o9iT1QKHgf85wo8y_Zxw' in parents");
+	console.log(fileInfo);
 
-function test() {
-	
-	getAuth().then((auth) => {
-		//addPermission(auth);
-		listFolders(auth, "name='Exports'");
-		//download(auth, '1zVDTMrAgoPJTePLgq-4EB2SHUEMLJ9UN');
-	});
-	
-	
-	
 }
-
 test();
 */
+
 
 
 var listener = app.listen(process.env.PORT, function() {
 	console.log('Your app is listening on port ' + listener.address().port);
 })
-
 
