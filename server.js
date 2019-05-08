@@ -24,7 +24,7 @@ app.get('/files', async function(req,res) {
 		
 		do {
 			var pageSize = Math.min(100, pageCount);
-			var currFiles = await listFolders(auth, query, nextPageToken, pageSize, fields);
+			var currFiles = await listFiles(auth, query, nextPageToken, pageSize, fields);
 			if (currFiles.err) {
 				res.send({code: 404, status: 'error', message: err});
 				return;
@@ -78,7 +78,7 @@ function getAuthorize(credentials) {
 }
 
 
-function listFolders(auth, query, nextPageToken, pageSize = 100, fields) {
+function listFiles(auth, query, nextPageToken, pageSize = 100, fields) {
 	const drive = google.drive({version: 'v3', auth});
 	return new Promise(function (resolve, reject) {
 		drive.files.list({
@@ -97,43 +97,6 @@ function listFolders(auth, query, nextPageToken, pageSize = 100, fields) {
 }
 
 
-
-function getFileNames(auth, query, nextPageToken, fileIds, callback) {
-  const drive = google.drive({version: 'v3', auth});
-  
-  drive.files.list({
-    pageSize: 100,
-    fields: '*',
-	q: query,
-	pageToken: nextPageToken
-  }, (err, res) => {
-    if (err) {
-		return post.send({
-			code: 500, 
-			status: 'error', 
-			message: 'The API returned an error: ' + err
-		});
-	}
-	const newPageToken = res.data.nextPageToken;
-    const files = res.data.files;
-	
-    if (files.length) {	
-      files.forEach(function (file) {
-		fileIds.push({name: file.name, id: file.id, link: file.webViewLink});
-	  });
-    } else {
-      console.log('No files found.');
-	  post.send({code: 404, status: 'error', message: 'No files found.'});
-    }
-	if (newPageToken) {
-		return callback(auth, query, newPageToken, fileIds, callback);
-		
-	} else {
-		post.send({code: 200, status: 'success', data: fileIds});
-	}
-	
-  });
-}
 
 function addPermission(auth) {
 	const drive = google.drive({version: 'v3', auth});
@@ -205,20 +168,32 @@ function getAuth() {
 		})
 	})
 }
-function test() {
+async function test() {
 	var auth = await getAuth();
 	
 	var nextPageToken = null;
 	var files = [];
 	var count = 222;
-	var query = "'1cbyYutR6Qnj4o9iT1QKHgf85wo8y_Zxw' in parents";
-	var fileInfo = await getFoldersHelper(auth, "'1cbyYutR6Qnj4o9iT1QKHgf85wo8y_Zxw' in parents", nextPageToken, count);
+	var query = "'1k49A8dUMYmGtQFLoaMScyhD27RoECL3M' in parents";
+	var fields = 'nextPageToken, files(name, modifiedTime, webViewLink)';
+	var pageCount = Number.MAX_VALUE;
+	do {
+		var pageSize = Math.min(100, pageCount);
+		var currFiles = await listFiles(auth, query, nextPageToken, pageSize, fields);
+		if (currFiles.err) {
+			res.send({code: 404, status: 'error', message: err});
+			return;
+		}
+		pageCount -= 100;
+		files = files.concat(currFiles.files);
+		nextPageToken = currFiles.nextPageToken;
+	} while (nextPageToken && pageCount > 0);
 	
-	console.log(fileInfo);
+	console.log(files.length);
 }
 test();
-*/
 
+*/
 
 
 var listener = app.listen(process.env.PORT, function() {
