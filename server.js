@@ -25,7 +25,7 @@ app.get('/folders', function(req,res){
 		
 		res.send({code: 200, status: 'success', data: fileInfo});
 	} catch (e) {
-		res.send({code: 404, status: 'error', message: 'An error has occurred'});
+		res.send({code: 404, status: 'error', message: 'An error has occurred' + e});
 	}
 })
 
