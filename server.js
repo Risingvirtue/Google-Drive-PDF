@@ -32,7 +32,7 @@ app.get('/folders', async function(req,res) {
 			nextPageToken = currFiles.nextPageToken;
 		} while (nextPageToken && pageCount > 0);
 		
-		res.send({code: 200, status: 'success', data: fileInfo});
+		res.send({code: 200, status: 'success', data: {files: files, nextPageToken: nextPageToken}});
 		
 	} catch (e) {
 		res.send({code: 404, status: 'error', message: 'An error has occurred' + e});
