@@ -37,7 +37,7 @@ app.get('/files', async function(req,res) {
 		res.send({code: 200, status: 'success', data: {files: files, nextPageToken: nextPageToken}});
 		
 	} catch (e) {
-		res.send({code: 404, status: 'error', message: 'An error has occurred' + e});
+		res.send({code: 404, status: 'error', message: e});
 	}
 })
 
@@ -124,31 +124,6 @@ function addPermission(auth) {
 	*/
 }
 
-function download(auth, fileId) {
-	const drive = google.drive({version: 'v3', auth});
-
-	drive.files.get({fileId: fileId, alt: 'media'}, {responseType: 'stream'},
-    function(err, res){
-		var chunks = [];
-			res.data
-			.on('data', function(chunk) {
-				chunks.push(chunk);
-			})
-			.on('end', () => {
-				var result = Buffer.concat(chunks);
-				
-				var base64 = result.toString('base64');
-				
-				post.send({code: 200, status: 'success', data: base64});
-
-			})
-			.on('error', err => {
-				console.log('Error', err);
-				res.send({code: 404, status: 'error', message: 'An error has occurred: ' + err});
-			})
-		}
-	);
-}
 
 /*
 function getAuth() {
