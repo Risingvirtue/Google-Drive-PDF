@@ -11,28 +11,28 @@ app.get('/', function(req,res){
 	res.send('works');
 });
 
-app.get('/folders', async function(req,res){
+app.get('/folders', async function(req,res) {
 	try {
-		var client_email = req.headers.client_email;
-
-		//couldn't send \n
-		var private_key = req.headers.private_key;
-		
-		private_key = private_key.split('?').join('\n');
-		
-		var access = {client_email: client_email, private_key: private_key};
-		
+		var access = getKeyFromHeader(req.headers);
 		var auth = getAuthorize(access);
 
-		post = res;
-		var fileInfo = await getFoldersHelper(
-			auth, 
-			req.headers.query, 
-			req.headers.nextPageToken, 
-			req.headers.pageCount
-		);
+		var files = [];
+		var nextPageToken = req.headers.nextPageToken || null;
+		var pageCount = req.headers.pageCount || 100;
+		do {
+			var pageSize = Math.min(100, pageCount);
+			var currFiles = await listFolders(auth, query, nextPageToken, pageSize);
+			if (currFiles.err) {
+				res.send({code: 404, status: 'error', message: err});
+				return;
+			}
+			pageCount -= 100;
+			files = files.concat(currFiles.files);
+			nextPageToken = currFiles.nextPageToken;
+		} while (nextPageToken && pageCount > 0);
 		
 		res.send({code: 200, status: 'success', data: fileInfo});
+		
 	} catch (e) {
 		res.send({code: 404, status: 'error', message: 'An error has occurred' + e});
 	}
@@ -84,21 +84,7 @@ function getAuthorize(credentials) {
 	);
 	return jwtClient;
 }
-async function getFoldersHelper(auth, query, nextPageToken = null, pageCount = 100) {
-	var auth = await getAuth();
-	var files = [];
-	do {
-		var pageSize = Math.min(100, pageCount);
-		var currFiles = await listFolders(auth, query, nextPageToken, pageSize);
-		if (currFiles.err) {
-			post.send({code: 404, status: 'error', message: err})
-		}
-		pageCount -= 100;
-		files = files.concat(currFiles.files);
-		nextPageToken = currFiles.nextPageToken;
-	} while (nextPageToken && pageCount > 0);
-	return {files: files, nextPageToken: nextPageToken};
-}
+
 
 function listFolders(auth, query, nextPageToken, pageSize = 100) {
 	const drive = google.drive({version: 'v3', auth});
