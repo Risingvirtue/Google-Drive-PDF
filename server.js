@@ -11,7 +11,7 @@ app.get('/', function(req,res){
 	res.send('works');
 });
 
-app.get('/folders', function(req,res){
+app.get('/folders', async function(req,res){
 	try {
 		var client_email = req.headers.client_email;
 
@@ -23,8 +23,7 @@ app.get('/folders', function(req,res){
 		var access = {client_email: client_email, private_key: private_key};
 		
 		var auth = getAuthorize(access);
-		res.send({code: 200, status: 'success', data: req.headers});
-		return;
+
 		post = res;
 		var fileInfo = await getFoldersHelper(
 			auth, 
