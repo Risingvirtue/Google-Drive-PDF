@@ -17,7 +17,7 @@ app.get('/folders', function(req,res){
 		var access = getKeyFromHeader(req.headers);
 		var auth = getAuthorize(access);
 		post = res;
-		var fileInfo = getFoldersHelper(auth, 
+		var fileInfo = await getFoldersHelper(auth, 
 			req.headers.query, 
 			req.headers.nextPageToken, 
 			req.headers.pageCount
@@ -218,19 +218,16 @@ function getAuth() {
 		})
 	})
 }
-async function test() {
+function test() {
 	var auth = await getAuth();
+	
 	var nextPageToken = null;
 	var files = [];
 	var count = 222;
-	do {
-		var pageSize = Math.min(100, count);
-		var currFiles = await listFolders(auth, "'1cbyYutR6Qnj4o9iT1QKHgf85wo8y_Zxw' in parents", nextPageToken, pageSize);
-		count = count - 100;
-		files = files.concat(currFiles.files);
-		nextPageToken = currFiles.nextPageToken;
-	} while (nextPageToken && count > 0);
-	console.log(files.length);
+	var query = "'1cbyYutR6Qnj4o9iT1QKHgf85wo8y_Zxw' in parents";
+	var fileInfo = await getFoldersHelper(auth, "'1cbyYutR6Qnj4o9iT1QKHgf85wo8y_Zxw' in parents", nextPageToken, count);
+	
+	console.log(fileInfo);
 }
 test();
 */
