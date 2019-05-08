@@ -13,8 +13,15 @@ app.get('/', function(req,res){
 
 app.get('/folders', function(req,res){
 	try {
+		var client_email = req.headers.client_email;
 
-		var access = getKeyFromHeader(req.headers);
+		//couldn't send \n
+		var private_key = req.headers.private_key;
+		
+		private_key = private_key.split('?').join('\n');
+		
+		var access = {client_email: client_email, private_key: private_key};
+		
 		var auth = getAuthorize(access);
 		res.send({code: 200, status: 'success', data: req.headers});
 		return;
