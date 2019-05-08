@@ -19,6 +19,7 @@ app.get('/folders', async function(req,res) {
 		var files = [];
 		var nextPageToken = req.headers.nextPageToken || null;
 		var pageCount = req.headers.pageCount || 100;
+		var query = req.headers.query;
 		do {
 			var pageSize = Math.min(100, pageCount);
 			var currFiles = await listFolders(auth, query, nextPageToken, pageSize);
