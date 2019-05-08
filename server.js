@@ -11,7 +11,7 @@ app.get('/', function(req,res){
 	res.send('works');
 });
 
-app.get('/folders', async function(req,res) {
+app.get('/files', async function(req,res) {
 	try {
 		var access = getKeyFromHeader(req.headers);
 		var auth = getAuthorize(access);
@@ -20,9 +20,10 @@ app.get('/folders', async function(req,res) {
 		var nextPageToken = req.headers.nextPageToken || null;
 		var pageCount = req.headers.pageCount || 100;
 		var query = req.headers.query;
+		var fields = req.headers.fields;
 		do {
 			var pageSize = Math.min(100, pageCount);
-			var currFiles = await listFolders(auth, query, nextPageToken, pageSize);
+			var currFiles = await listFolders(auth, query, nextPageToken, pageSize, fields);
 			if (currFiles.err) {
 				res.send({code: 404, status: 'error', message: err});
 				return;
@@ -41,13 +42,29 @@ app.get('/folders', async function(req,res) {
 
 app.get('/files', function(req,res){
 	try {
-
 		var access = getKeyFromHeader(req.headers);
 		var auth = getAuthorize(access);
+
+		var files = [];
+		var nextPageToken = req.headers.nextPageToken || null;
+		var pageCount = req.headers.pageCount || 100;
+		var query = req.headers.query;
+		do {
+			var pageSize = Math.min(100, pageCount);
+			var currFiles = await listFolders(auth, query, nextPageToken, pageSize, params);
+			if (currFiles.err) {
+				res.send({code: 404, status: 'error', message: err});
+				return;
+			}
+			pageCount -= 100;
+			files = files.concat(currFiles.files);
+			nextPageToken = currFiles.nextPageToken;
+		} while (nextPageToken && pageCount > 0);
 		
-		getFoldersHelper(auth, req.headers.query);
+		res.send({code: 200, status: 'success', data: {files: files, nextPageToken: nextPageToken}});
+		
 	} catch (e) {
-		res.send({code: 404, status: 'error', message: 'An error has occurred'});
+		res.send({code: 404, status: 'error', message: 'An error has occurred' + e});
 	}
 })
 
@@ -87,12 +104,12 @@ function getAuthorize(credentials) {
 }
 
 
-function listFolders(auth, query, nextPageToken, pageSize = 100) {
+function listFolders(auth, query, nextPageToken, pageSize = 100, fields) {
 	const drive = google.drive({version: 'v3', auth});
 	return new Promise(function (resolve, reject) {
 		drive.files.list({
 			pageSize: pageSize,
-			fields: 'nextPageToken, files(id, name, modifiedTime)',
+			fields: fields,
 			q: query,
 			orderBy: 'modifiedTime desc',
 			pageToken: nextPageToken
