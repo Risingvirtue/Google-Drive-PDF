@@ -13,6 +13,7 @@ app.get('/', function(req,res){
 
 app.get('/files', async function(req,res) {
 	try {
+		console.log(req.headers);
 		var access = getKeyFromHeader(req.headers);
 		var auth = getAuthorize(access);
 
@@ -21,6 +22,7 @@ app.get('/files', async function(req,res) {
 		var pageCount = req.headers.pageCount || 100;
 		var query = req.headers.query;
 		var fields = req.headers.fields;
+		
 		do {
 			var pageSize = Math.min(100, pageCount);
 			var currFiles = await listFolders(auth, query, nextPageToken, pageSize, fields);
