@@ -11,22 +11,31 @@ app.get('/', function(req,res){
 	res.send('works');
 });
 
+app.get('/folders', function(req,res){
+	try {
+
+		var access = getKeyFromHeader(req.headers);
+		var auth = getAuthorize(access);
+		post = res;
+		var fileInfo = getFoldersHelper(auth, 
+			req.headers.query, 
+			req.headers.nextPageToken, 
+			req.headers.pageCount
+		);
+		
+		res.send({code: 200, status: 'success', data: fileInfo});
+	} catch (e) {
+		res.send({code: 404, status: 'error', message: 'An error has occurred'});
+	}
+})
+
 app.get('/files', function(req,res){
 	try {
-		
-		var client_email = req.headers.client_email;
-	
-		//couldn't send \n
-		var private_key = req.headers.private_key;
-		
-		private_key = private_key.split('?').join('\n');
-		
-		var access = {client_email: client_email, private_key: private_key};
-		//res.send(access);
+
+		var access = getKeyFromHeader(req.headers);
 		var auth = getAuthorize(access);
 		
-		post = res;
-		listFolders(auth, req.headers.query);
+		getFoldersHelper(auth, req.headers.query);
 	} catch (e) {
 		res.send({code: 404, status: 'error', message: 'An error has occurred'});
 	}
@@ -34,21 +43,26 @@ app.get('/files', function(req,res){
 
 app.get('/download', function (req, res) {
 	
-	var client_email = req.headers.client_email;
+	var access = getKeyFromHeader(req.headers);
+	var auth = getAuthorize(access);
 
-	//couldn't send \n
-	var private_key = req.headers.private_key;
-	
-	private_key = private_key.split('?').join('\n');
-	
-	var access = {client_email: client_email, private_key: private_key};
-	
 	var auth = getAuthorize(access);
 	
 	post = res;
 	
 	download(auth, req.headers.fileid);
 })
+
+function getKeyFromRequest(headers) {
+	var client_email = headers.client_email;
+
+	//couldn't send \n
+	var private_key = headers.private_key;
+	
+	private_key = private_key.split('?').join('\n');
+	
+	return {client_email: client_email, private_key: private_key};
+}
 
 
 function getAuthorize(credentials) {
@@ -61,17 +75,33 @@ function getAuthorize(credentials) {
 	);
 	return jwtClient;
 }
+async function getFoldersHelper(auth, query, nextPageToken = null, pageCount = 100) {
+	var auth = await getAuth();
+	var files = [];
+	do {
+		var pageSize = Math.min(100, pageCount);
+		var currFiles = await listFolders(auth, query, nextPageToken, pageSize);
+		if (currFiles.err) {
+			post.send({code: 404, status: 'error', message: err})
+		}
+		pageCount -= 100;
+		files = files.concat(currFiles.files);
+		nextPageToken = currFiles.nextPageToken;
+	} while (nextPageToken && pageCount > 0);
+	return {files: files, nextPageToken: nextPageToken};
+}
 
-function listFolders(auth, query, pageSize = 100) {
+function listFolders(auth, query, nextPageToken, pageSize = 100) {
 	const drive = google.drive({version: 'v3', auth});
 	return new Promise(function (resolve, reject) {
 		drive.files.list({
 			pageSize: pageSize,
 			fields: 'nextPageToken, files(id, name, modifiedTime)',
 			q: query,
-			orderBy: 'modifiedTime desc'
+			orderBy: 'modifiedTime desc',
+			pageToken: nextPageToken
 		}, (err, res) => {
-			if (err) reject(err);
+			if (err) reject({err: err, files: null});
 			const nextPageToken = res.data.nextPageToken;
 			var files = res.data.files;
 			resolve({files: files, nextPageToken: nextPageToken});
@@ -190,9 +220,17 @@ function getAuth() {
 }
 async function test() {
 	var auth = await getAuth();
-	var fileInfo = await listFolders(auth, "'1cbyYutR6Qnj4o9iT1QKHgf85wo8y_Zxw' in parents");
-	console.log(fileInfo);
-
+	var nextPageToken = null;
+	var files = [];
+	var count = 222;
+	do {
+		var pageSize = Math.min(100, count);
+		var currFiles = await listFolders(auth, "'1cbyYutR6Qnj4o9iT1QKHgf85wo8y_Zxw' in parents", nextPageToken, pageSize);
+		count = count - 100;
+		files = files.concat(currFiles.files);
+		nextPageToken = currFiles.nextPageToken;
+	} while (nextPageToken && count > 0);
+	console.log(files.length);
 }
 test();
 */
