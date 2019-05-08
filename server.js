@@ -53,7 +53,7 @@ app.get('/download', function (req, res) {
 	download(auth, req.headers.fileid);
 })
 
-function getKeyFromRequest(headers) {
+function getKeyFromHeader(headers) {
 	var client_email = headers.client_email;
 
 	//couldn't send \n
