@@ -16,8 +16,11 @@ app.get('/folders', function(req,res){
 
 		var access = getKeyFromHeader(req.headers);
 		var auth = getAuthorize(access);
+		res.send({code: 200, status: 'success', data: req.headers});
+		return;
 		post = res;
-		var fileInfo = await getFoldersHelper(auth, 
+		var fileInfo = await getFoldersHelper(
+			auth, 
 			req.headers.query, 
 			req.headers.nextPageToken, 
 			req.headers.pageCount
