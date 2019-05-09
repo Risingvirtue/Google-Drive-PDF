@@ -18,7 +18,7 @@ app.get('/files', async function(req,res) {
 
 		var files = [];
 		var nextPageToken = req.headers.nextPageToken || null;
-		var pageCount = parseInt(req.headers.count) || 100;
+		var pageCount = parseFloat(req.headers.count) || 100;
 		var query = req.headers.query;
 		var fields = req.headers.fields;
 		
