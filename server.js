@@ -18,12 +18,11 @@ app.get('/files', async function(req,res) {
 
 		var files = [];
 		var nextPageToken = req.headers.nextPageToken || null;
-		var pageCount = req.headers.pageCount || 100;
+		var pageCount = parseInt(req.headers.pagecount) || 100;
 		var query = req.headers.query;
 		var fields = req.headers.fields;
 		
 		do {
-			console.log({headers: req.headers, pageCount: pageCount, query: query, fields: fields});
 			var pageSize = Math.min(100, pageCount);
 			var currFiles = await listFiles(auth, query, nextPageToken, pageSize, fields);
 			if (currFiles.err) {
