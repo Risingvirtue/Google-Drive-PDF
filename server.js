@@ -23,7 +23,7 @@ app.get('/files', async function(req,res) {
 		var fields = req.headers.fields;
 		
 		do {
-			console.log({pageCount: pageCount, query: query, fields: fields});
+			console.log({headers: req.headers, pageCount: pageCount, query: query, fields: fields});
 			var pageSize = Math.min(100, pageCount);
 			var currFiles = await listFiles(auth, query, nextPageToken, pageSize, fields);
 			if (currFiles.err) {
