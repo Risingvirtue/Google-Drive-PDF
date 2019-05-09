@@ -23,6 +23,7 @@ app.get('/files', async function(req,res) {
 		var fields = req.headers.fields;
 		
 		do {
+			console.log({pageCount: pageCount, query: query, fields: fields});
 			var pageSize = Math.min(100, pageCount);
 			var currFiles = await listFiles(auth, query, nextPageToken, pageSize, fields);
 			if (currFiles.err) {
@@ -149,8 +150,8 @@ async function test() {
 	var nextPageToken = null;
 	var files = [];
 	var count = 222;
-	var query = "'1k49A8dUMYmGtQFLoaMScyhD27RoECL3M' in parents";
-	var fields = 'nextPageToken, files(name, modifiedTime, webViewLink)';
+	var query = "'1cbyYutR6Qnj4o9iT1QKHgf85wo8y_Zxw' in parents"
+	var fields = 'nextPageToken, files(id, name, modifiedTime)';
 	var pageCount = Number.MAX_VALUE;
 	do {
 		var pageSize = Math.min(100, pageCount);
@@ -167,8 +168,8 @@ async function test() {
 	console.log(files.length);
 }
 test();
-
 */
+
 
 
 var listener = app.listen(process.env.PORT, function() {
