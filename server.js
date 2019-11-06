@@ -63,10 +63,8 @@ function download(auth, fileId) {
 			})
 			.on('end', () => {
 				var result = Buffer.concat(chunks);
-				return;
 				var base64 = result.toString('base64');
-				
-				post.send({code: 200, status: 'success', data: base64});
+				post.send({code: 200, status: 'success', data: result.toString()});
 
 			})
 			.on('error', err => {
@@ -119,8 +117,8 @@ function listFiles(auth, query, nextPageToken, pageSize = 100, fields) {
 		});
 	});
 }
-
 /*
+
 function getAuth() {
 	return new Promise(function (resolve, reject) {
 		fs.readFile('./creds.json', function read(err, data) {
@@ -158,11 +156,11 @@ async function test() {
 		nextPageToken = currFiles.nextPageToken;
 	} while (nextPageToken && pageCount > 0);
 	
-	
+	var info = download(auth, '1M7SNWLRNd1oFDLvXLNAk_aNDmyKEEtPR');
 }
 test();
-*/
 
+*/
 
 
 var listener = app.listen(process.env.PORT, function() {
