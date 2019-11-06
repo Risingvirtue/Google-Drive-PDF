@@ -47,12 +47,35 @@ app.get('/download', function (req, res) {
 	var access = getKeyFromHeader(req.headers);
 	var auth = getAuthorize(access);
 
-	var auth = getAuthorize(access);
-	
 	post = res;
 	
 	download(auth, req.headers.fileid);
 })
+
+function download(auth, fileId) {
+	const drive = google.drive({version: 'v3', auth});
+	drive.files.get({fileId: fileId, alt: 'media'}, {responseType: 'stream'},
+    function(err, res){
+		var chunks = [];
+			res.data
+			.on('data', function(chunk) {
+				chunks.push(chunk);
+			})
+			.on('end', () => {
+				var result = Buffer.concat(chunks);
+				return;
+				var base64 = result.toString('base64');
+				
+				post.send({code: 200, status: 'success', data: base64});
+
+			})
+			.on('error', err => {
+				console.log('Error', err);
+				res.send({code: 404, status: 'error', message: 'An error has occurred: ' + err});
+			})
+		}
+	);
+}
 
 function getKeyFromHeader(headers) {
 	var client_email = headers.client_email;
@@ -80,6 +103,7 @@ function getAuthorize(credentials) {
 
 function listFiles(auth, query, nextPageToken, pageSize = 100, fields) {
 	const drive = google.drive({version: 'v3', auth});
+	
 	return new Promise(function (resolve, reject) {
 		drive.files.list({
 			pageSize: pageSize,
@@ -87,7 +111,7 @@ function listFiles(auth, query, nextPageToken, pageSize = 100, fields) {
 			q: query,
 			orderBy: 'modifiedTime desc',
 			pageToken: nextPageToken
-		}, (err, res) => {
+		}, (err, res, req) => {
 			if (err) reject({err: err, files: null});
 			const nextPageToken = res.data.nextPageToken;
 			var files = res.data.files;
@@ -95,35 +119,6 @@ function listFiles(auth, query, nextPageToken, pageSize = 100, fields) {
 		});
 	});
 }
-
-
-
-function addPermission(auth) {
-	const drive = google.drive({version: 'v3', auth});
-	
-	drive.permissions.list({
-		pageSize: 100,
-		fileId: '18aTemJxND87PNZWOXScQTlQWC6qgJzn6'
-	}, (err, res) => {
-		if (err) {console.log('err', err)}
-	});
-	
-	/*
-	drive.permissions.create({
-		fileId: '18aTemJxND87PNZWOXScQTlQWC6qgJzn6',
-		requestBody: {
-			emailAddress: 'risingvirtue@gmail.com',
-			role: 'reader',
-			type: 'user'
-		}
-		
-	}, (err, res) => {
-		if (err) {console.log('err', err)}
-		console.log(res);
-	})
-	*/
-}
-
 
 /*
 function getAuth() {
@@ -148,8 +143,7 @@ async function test() {
 	
 	var nextPageToken = null;
 	var files = [];
-	var count = 222;
-	var query = "'1cbyYutR6Qnj4o9iT1QKHgf85wo8y_Zxw' in parents"
+	var query = "'1QKXKvEOLb_jWhWgJqT36pY-slQTfg2ng' in parents"
 	var fields = 'nextPageToken, files(id, name, modifiedTime)';
 	var pageCount = Number.MAX_VALUE;
 	do {
@@ -164,7 +158,7 @@ async function test() {
 		nextPageToken = currFiles.nextPageToken;
 	} while (nextPageToken && pageCount > 0);
 	
-	console.log(files.length);
+	
 }
 test();
 */
