@@ -16,7 +16,7 @@
     "express": "4.16.4",
     "file-base64": "1.0.0",
     "google-oauth-jwt": "0.2.0",
-    "googleapis": "34.0.0",
+    "googleapis": "39.1.0",
     "opn": "5.4.0",
     "server-destroy": "1.0.1"
   }
